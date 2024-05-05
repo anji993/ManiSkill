@@ -71,7 +71,10 @@ def _worker(
                 method = getattr(env, data[0])
                 remote.send(method(*data[1], **data[2]))
             elif cmd == "get_attr":
-                remote.send(getattr(env, data))
+                if data in ['enabled_cameras']:
+                    remote.send(env.get_wrapper_attr('enabled_cameras'))
+                else:
+                    remote.send(getattr(env, data))                
             elif cmd == "set_attr":
                 remote.send(setattr(env, data[0], data[1]))
             elif cmd == "handshake":

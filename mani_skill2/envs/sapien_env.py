@@ -93,6 +93,7 @@ class BaseEnv(gym.Env):
         camera_cfgs: dict = None,
         render_camera_cfgs: dict = None,
         bg_name: str = None,
+        enabled_cameras: list = None,
     ):
         # Create SAPIEN engine
         self._engine = sapien.Engine()
@@ -192,6 +193,15 @@ class BaseEnv(gym.Env):
             for uid, camera in self._cameras.items():
                 image_obs_space.spaces[uid] = camera.observation_space
         self.action_space = self.agent.action_space
+
+        # added features
+        if self._obs_mode == "image":
+            self.enabled_cameras = []
+            for uid, camera in self._cameras.items():
+                if enabled_cameras is None or uid in enabled_cameras:
+                    self.enabled_cameras.append(uid)    
+        else:
+            self.enabled_cameras = None
 
     def _configure_agent(self):
         # TODO(jigu): Support a dummy agent for simulation only

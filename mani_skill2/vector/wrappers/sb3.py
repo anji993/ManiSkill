@@ -50,9 +50,10 @@ class SB3VecEnvWrapper(SB3VecEnv):
                 truncations[env_idx] and not terminations[env_idx]
             )
         dones = terminations | truncations
+
         if not dones.any():
             return vec_obs, rews, dones, infos
-
+        
         for i, done in enumerate(dones):
             if done:
                 # NOTE: ensure that it will not be inplace modified when reset
