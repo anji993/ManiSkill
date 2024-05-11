@@ -59,6 +59,18 @@ class StationaryManipulationEnv(BaseEnv):
         agent_cls: Type[BaseAgent] = self.SUPPORTED_ROBOTS[self.robot_uid]
         self._agent_cfg = agent_cls.get_default_config()
 
+    def _load_camera_mount_actors(self):
+        self.camera_mount_actors = {
+            "tsdf_0_camera": self._scene.create_actor_builder().build_kinematic(),
+            "tsdf_1_camera": self._scene.create_actor_builder().build_kinematic(),
+            "tsdf_2_camera": self._scene.create_actor_builder().build_kinematic(),
+            "tsdf_3_camera": self._scene.create_actor_builder().build_kinematic(),
+            "tsdf_4_camera": self._scene.create_actor_builder().build_kinematic(),
+            "tsdf_5_camera": self._scene.create_actor_builder().build_kinematic(),
+            "floating_0_camera": self._scene.create_actor_builder().build_kinematic(),
+            "floating_1_camera": self._scene.create_actor_builder().build_kinematic(),
+        }
+
     def _load_agent(self):
         agent_cls: Type[Panda] = self.SUPPORTED_ROBOTS[self.robot_uid]
         self.agent = agent_cls(
@@ -68,6 +80,16 @@ class StationaryManipulationEnv(BaseEnv):
             self.agent.robot.get_links(), self.agent.config.ee_link_name
         )
         set_articulation_render_material(self.agent.robot, specular=0.9, roughness=0.3)
+
+    def _initialize_camera_mount_actors(self):
+        self.camera_mount_actors["tsdf_0_camera"].set_pose(sapien.Pose.from_transformation_matrix(np.eye(4)))
+        self.camera_mount_actors["tsdf_1_camera"].set_pose(sapien.Pose.from_transformation_matrix(np.eye(4)))
+        self.camera_mount_actors["tsdf_2_camera"].set_pose(sapien.Pose.from_transformation_matrix(np.eye(4)))
+        self.camera_mount_actors["tsdf_3_camera"].set_pose(sapien.Pose.from_transformation_matrix(np.eye(4)))
+        self.camera_mount_actors["tsdf_4_camera"].set_pose(sapien.Pose.from_transformation_matrix(np.eye(4)))
+        self.camera_mount_actors["tsdf_5_camera"].set_pose(sapien.Pose.from_transformation_matrix(np.eye(4)))
+        self.camera_mount_actors["floating_0_camera"].set_pose(sapien.Pose.from_transformation_matrix(np.eye(4)))
+        self.camera_mount_actors["floating_1_camera"].set_pose(sapien.Pose.from_transformation_matrix(np.eye(4)))
 
     def _initialize_agent(self):
         if self.robot_uid == "panda":
@@ -122,6 +144,35 @@ class StationaryManipulationEnv(BaseEnv):
         return CameraConfig(
             "base_camera", pose.p, pose.q, 128, 128, np.pi / 2, 0.01, 10
         )
+    
+    def _register_actor_mounted_cameras(self):
+        pose = sapien.Pose()
+        return [
+            CameraConfig(
+                "tsdf_0_camera", pose.p, pose.q, 128, 128, np.pi / 2, 0.01, 10, actor_uid="tsdf_0_camera"
+                ),
+            CameraConfig(
+                "tsdf_1_camera", pose.p, pose.q, 128, 128, np.pi / 2, 0.01, 10, actor_uid="tsdf_1_camera"
+                ),
+            CameraConfig(
+                "tsdf_2_camera", pose.p, pose.q, 128, 128, np.pi / 2, 0.01, 10, actor_uid="tsdf_2_camera"
+                ),
+            CameraConfig(
+                "tsdf_3_camera", pose.p, pose.q, 128, 128, np.pi / 2, 0.01, 10, actor_uid="tsdf_3_camera"
+                ),
+            CameraConfig(
+                "tsdf_4_camera", pose.p, pose.q, 128, 128, np.pi / 2, 0.01, 10, actor_uid="tsdf_4_camera"
+                ),
+            CameraConfig(
+                "tsdf_5_camera", pose.p, pose.q, 128, 128, np.pi / 2, 0.01, 10, actor_uid="tsdf_5_camera"
+                ),
+            CameraConfig(
+                "floating_0_camera", pose.p, pose.q, 128, 128, np.pi / 2, 0.01, 10, actor_uid="floating_0_camera"
+                ),
+            CameraConfig(
+                "floating_1_camera", pose.p, pose.q, 128, 128, np.pi / 2, 0.01, 10, actor_uid="floating_1_camera"
+                ),
+        ]
 
     def _register_render_cameras(self):
         if self.robot_uid == "panda":

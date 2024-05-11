@@ -74,6 +74,7 @@ class BaseEnv(gym.Env):
     _cameras: Dict[str, Camera]
     _camera_cfgs: Dict[str, CameraConfig]
     _agent_camera_cfgs: Dict[str, CameraConfig]
+    _actor_mounted_camera_cfgs: Dict[str, CameraConfig]
     _render_cameras: Dict[str, Camera]
     _render_camera_cfgs: Dict[str, CameraConfig]
 
@@ -172,10 +173,10 @@ class BaseEnv(gym.Env):
         self._configure_cameras()
         self._configure_render_cameras()
         # Override camera configurations
-        if camera_cfgs is not None:
-            update_camera_cfgs_from_dict(self._camera_cfgs, camera_cfgs)
-        if render_camera_cfgs is not None:
-            update_camera_cfgs_from_dict(self._render_camera_cfgs, render_camera_cfgs)
+        # if camera_cfgs is not None:
+        #     update_camera_cfgs_from_dict(self._camera_cfgs, camera_cfgs)
+        # if render_camera_cfgs is not None:
+        #     update_camera_cfgs_from_dict(self._render_camera_cfgs, render_camera_cfgs)
 
         # Lighting
         self.enable_shadow = enable_shadow
@@ -211,12 +212,22 @@ class BaseEnv(gym.Env):
         self._camera_cfgs = OrderedDict()
         self._camera_cfgs.update(parse_camera_cfgs(self._register_cameras()))
 
+        self._actor_mounted_camera_cfgs = OrderedDict()
+        self._actor_mounted_camera_cfgs.update(parse_camera_cfgs(self._register_actor_mounted_cameras()))
+        self._camera_cfgs.update(self._actor_mounted_camera_cfgs)
+
         self._agent_camera_cfgs = OrderedDict()
         if self._agent_cfg is not None:
             self._agent_camera_cfgs = parse_camera_cfgs(self._agent_cfg.cameras)
             self._camera_cfgs.update(self._agent_camera_cfgs)
 
     def _register_cameras(
+        self,
+    ) -> Union[CameraConfig, Sequence[CameraConfig], Dict[str, CameraConfig]]:
+        """Register (non-agent) cameras for the environment."""
+        return []
+    
+    def _register_actor_mounted_cameras(
         self,
     ) -> Union[CameraConfig, Sequence[CameraConfig], Dict[str, CameraConfig]]:
         """Register (non-agent) cameras for the environment."""
@@ -371,6 +382,7 @@ class BaseEnv(gym.Env):
         self._setup_scene()
         self._load_agent()
         self._load_actors()
+        self._load_camera_mount_actors()
         self._load_articulations()
         self._setup_cameras()
         self._setup_lighting()
@@ -402,6 +414,9 @@ class BaseEnv(gym.Env):
     def _load_actors(self):
         pass
 
+    def _load_camera_mount_actors(self):
+        pass
+
     def _load_articulations(self):
         pass
 
@@ -413,6 +428,9 @@ class BaseEnv(gym.Env):
         for uid, camera_cfg in self._camera_cfgs.items():
             if uid in self._agent_camera_cfgs:
                 articulation = self.agent.robot
+            elif uid in self._actor_mounted_camera_cfgs:
+                assert uid in self.camera_mount_actors
+                articulation = self.camera_mount_actors[uid]
             else:
                 articulation = None
             if isinstance(camera_cfg, StereoDepthCameraConfig):
@@ -524,9 +542,14 @@ class BaseEnv(gym.Env):
         No new assets are created. Task-relevant information can be initialized here, like goals.
         """
         self._initialize_actors()
+        self._initialize_camera_mount_actors()
         self._initialize_articulations()
         self._initialize_agent()
         self._initialize_task()
+
+    
+    def _initialize_camera_mount_actors(self):
+        pass
 
     def _initialize_actors(self):
         """Initialize the poses of actors."""
@@ -637,6 +660,8 @@ class BaseEnv(gym.Env):
         """
         self._close_viewer()
         self.agent = None
+        self.camera_mount_actors = None
+
         self._cameras = OrderedDict()
         self._render_cameras = OrderedDict()
         self._scene = None
