@@ -82,14 +82,30 @@ class StationaryManipulationEnv(BaseEnv):
         set_articulation_render_material(self.agent.robot, specular=0.9, roughness=0.3)
 
     def _initialize_camera_mount_actors(self):
-        self.camera_mount_actors["tsdf_0_camera"].set_pose(sapien.Pose.from_transformation_matrix(np.eye(4)))
-        self.camera_mount_actors["tsdf_1_camera"].set_pose(sapien.Pose.from_transformation_matrix(np.eye(4)))
-        self.camera_mount_actors["tsdf_2_camera"].set_pose(sapien.Pose.from_transformation_matrix(np.eye(4)))
-        self.camera_mount_actors["tsdf_3_camera"].set_pose(sapien.Pose.from_transformation_matrix(np.eye(4)))
-        self.camera_mount_actors["tsdf_4_camera"].set_pose(sapien.Pose.from_transformation_matrix(np.eye(4)))
-        self.camera_mount_actors["tsdf_5_camera"].set_pose(sapien.Pose.from_transformation_matrix(np.eye(4)))
-        self.camera_mount_actors["floating_0_camera"].set_pose(sapien.Pose.from_transformation_matrix(np.eye(4)))
-        self.camera_mount_actors["floating_1_camera"].set_pose(sapien.Pose.from_transformation_matrix(np.eye(4)))
+        self.camera_mount_actors["tsdf_0_camera"].set_pose(look_at([np.sqrt(3)/2*0.4-0.1, -0.5*0.4, 0.6], [-0.1, 0, 0.1]))
+        self.camera_mount_actors["tsdf_1_camera"].set_pose(look_at([np.sqrt(3)/2*0.4-0.1, 0.5*0.4, 0.6], [-0.1, 0, 0.1]))
+        self.camera_mount_actors["tsdf_2_camera"].set_pose(look_at([-0.1, 0.4, 0.6], [-0.1, 0, 0.1]))
+        self.camera_mount_actors["tsdf_3_camera"].set_pose(look_at([-np.sqrt(3)/2*0.4-0.1, 0.5*0.4, 0.6], [-0.1, 0, 0.1]))
+        self.camera_mount_actors["tsdf_4_camera"].set_pose(look_at([-np.sqrt(3)/2*0.4-0.1, -0.5*0.4, 0.6], [-0.1, 0, 0.1]))
+        self.camera_mount_actors["tsdf_5_camera"].set_pose(look_at([-0.1, -0.4, 0.6], [-0.1, 0, 0.1]))
+        
+        if self._n_floating_cameras == 0:
+            return
+        radius = np.sqrt(0.52)
+        if self._n_floating_cameras == 1:
+            theta = self._episode_rng.rand() * np.pi / 2
+            phi = self._episode_rng.rand() * np.pi - np.pi / 2
+        else:
+            theta = self._episode_rng.rand() * np.pi / 2
+            phi = self._episode_rng.rand() * np.pi / 2 - np.pi / 2
+        self.camera_mount_actors["floating_0_camera"].set_pose(look_at([radius*np.sin(theta)*np.cos(phi)*0.4-0.1,
+                                                                        radius*np.sin(theta)*np.sin(phi)*0.4, 0.6], [-0.1, 0, 0.1]))
+        if self._n_floating_cameras == 1:
+            return
+        theta = self._episode_rng.rand() * np.pi / 2
+        phi = self._episode_rng.rand() * np.pi / 2
+        self.camera_mount_actors["floating_1_camera"].set_pose(look_at([radius*np.sin(theta)*np.cos(phi)*0.4-0.1,
+                                                                        radius*np.sin(theta)*np.sin(phi)*0.4, 0.6], [-0.1, 0, 0.1]))
 
     def _initialize_agent(self):
         if self.robot_uid == "panda":

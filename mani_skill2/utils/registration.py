@@ -92,7 +92,7 @@ def make(env_id, as_gym=True, enable_segmentation=False, **kwargs):
     env = env_spec.make(**kwargs)
 
     # Dispatch observation wrapper
-    if "rgbd" in obs_mode or "rgb" in obs_mode:
+    if "rgbd" in obs_mode or "rgb" in obs_mode or "tsdf" in obs_mode:
         env = RGBDObservationWrapper(env)
     elif "pointcloud" in obs_mode:
         env = PointCloudObservationWrapper(env)

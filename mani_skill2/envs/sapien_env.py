@@ -94,7 +94,7 @@ class BaseEnv(gym.Env):
         camera_cfgs: dict = None,
         render_camera_cfgs: dict = None,
         bg_name: str = None,
-        enabled_cameras: list = None,
+        enabled_cameras: list = [],
     ):
         # Create SAPIEN engine
         self._engine = sapien.Engine()
@@ -173,10 +173,13 @@ class BaseEnv(gym.Env):
         self._configure_cameras()
         self._configure_render_cameras()
         # Override camera configurations
-        # if camera_cfgs is not None:
-        #     update_camera_cfgs_from_dict(self._camera_cfgs, camera_cfgs)
-        # if render_camera_cfgs is not None:
-        #     update_camera_cfgs_from_dict(self._render_camera_cfgs, render_camera_cfgs)
+        if camera_cfgs is not None:
+            update_camera_cfgs_from_dict(self._camera_cfgs, camera_cfgs)
+        if render_camera_cfgs is not None:
+            update_camera_cfgs_from_dict(self._render_camera_cfgs, render_camera_cfgs)
+
+        # added features
+        self._n_floating_cameras = 0
 
         # Lighting
         self.enable_shadow = enable_shadow
@@ -199,8 +202,9 @@ class BaseEnv(gym.Env):
         if self._obs_mode == "image":
             self.enabled_cameras = []
             for uid, camera in self._cameras.items():
-                if enabled_cameras is None or uid in enabled_cameras:
-                    self.enabled_cameras.append(uid)    
+                if uid in enabled_cameras:
+                    self.enabled_cameras.append(uid)
+            self._n_floating_cameras = len([ec for ec in self.enabled_cameras if 'floating' in ec])
         else:
             self.enabled_cameras = None
 

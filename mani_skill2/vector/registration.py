@@ -82,7 +82,7 @@ def make(
     # Dispatch observation mode
     if "image" in obs_mode:
         venv_cls = VecEnv
-    elif "rgbd" in obs_mode or "rgb" in obs_mode:
+    elif "rgbd" in obs_mode or "rgb" in obs_mode or "tsdf" in obs_mode:
         venv_cls = RGBDVecEnv
     elif "pointcloud" in obs_mode:
         venv_cls = PointCloudVecEnv
